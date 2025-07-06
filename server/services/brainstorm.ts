@@ -538,7 +538,7 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
       const message = {
         speaker: userName,
         message: userInput.message,
-        avatar: "/src/images/person.png",
+        avatar: "/images/person.png",
         type: "user" as const,
       };
       updatedDiscussion.push(message);
@@ -555,7 +555,7 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
         const autoStickyNote = {
           id: `user-${Date.now()}-auto`,
           author: userName,
-          avatar: "/src/images/person.png",
+          avatar: "/images/person.png",
           content: userInput.message,
           timestamp: new Date().toISOString(),
           votes: 0,
@@ -577,7 +577,7 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
         const stickyNote = {
           id: `user-${Date.now()}-${index}`,
           author: userName,
-          avatar: "/src/images/person.png",
+          avatar: "/images/person.png",
           content: noteContent,
           timestamp: new Date().toISOString(),
           votes: 0,
@@ -728,7 +728,7 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
           const votingMessage = {
             speaker: participant.name,
             message: `💭 Voting rationale: ${userVotes.reasoning || "No explanation provided."}`,
-            avatar: "/src/images/person.png",
+            avatar: "/images/person.png",
             type: "user" as const,
           };
           updatedDiscussion.push(votingMessage);

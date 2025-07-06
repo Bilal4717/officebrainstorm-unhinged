@@ -282,7 +282,7 @@ Format as JSON:
 ///////////////////////////////////////////////////////////////////////////
 export class AIAssistantAgent implements BrainstormAgent {
   name = "AI Assistant";
-  avatar = "/src/images/robot.png";
+  avatar = "/images/robot.png";
   description =
     "Facilitator who encourages participation without proposing ideas.";
 

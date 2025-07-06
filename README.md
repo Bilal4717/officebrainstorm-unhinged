@@ -1,83 +1,141 @@
 # The Office Brainstorm
 
-An AI-powered brainstorming platform featuring characters from "The Office" TV show. Create dynamic brainstorming sessions where AI agents simulate character personalities and facilitate creative discussions.
+An advanced AI-powered brainstorming platform featuring characters from "The Office" TV show. Create dynamic brainstorming sessions with authentic Office characters using cutting-edge AI technology.
 
-## Features
+## 🚀 Features
 
-- **Character-Based AI Agents**: Choose from 8 Office characters with authentic personalities
-- **Real-Time Streaming**: Watch brainstorming sessions unfold in real-time
-- **Interactive Participation**: Join sessions as a participant or observer
-- **Smart Voting System**: Characters vote on ideas based on their personalities
-- **AI Analysis**: Automatic pros/cons analysis of sticky notes
-- **Key Takeaways**: AI-generated summaries of winning ideas
+- **Character Selection**: Choose from 8 authentic Office characters with distinct personalities
+- **AI-Powered Discussions**: Real-time streaming conversations with character-authentic responses
+- **Interactive Participation**: Users can contribute messages, sticky notes, and vote alongside AI characters
+- **Live Analysis**: Automatic pros/cons analysis of ideas as they're generated
+- **Voting System**: Democratic selection of top ideas with character-specific reasoning
+- **Password Protection**: Secure access with HTTP Basic Authentication
+- **Real-time Updates**: Server-Sent Events for live brainstorm session streaming
 
-## Technology Stack
+## 🛠 Technology Stack
 
-- **Frontend**: React 18 + TypeScript + Vite
-- **Backend**: Node.js + Express + TypeScript
-- **UI**: Radix UI + Tailwind CSS + shadcn/ui
-- **AI**: Vultr Inference API (llama-3.1-70b-instruct-fp8)
-- **Database**: PostgreSQL with Drizzle ORM
-- **Real-time**: Server-Sent Events (SSE)
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui
+- **Backend**: Node.js, Express, TypeScript
+- **AI**: Vultr Cloud API with LangChain & LangGraph orchestration
+- **Database**: PostgreSQL with Drizzle ORM (optional, defaults to in-memory)
+- **Authentication**: HTTP Basic Authentication
+- **Deployment**: Vultr Cloud Compute
 
-## Quick Start
+## 📋 Prerequisites
 
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+- Node.js 18+ 
+- npm or yarn
+- Vultr API key (for AI functionality)
 
-2. **Set environment variables**:
-   ```bash
-   VULTR_API_KEY=your_vultr_api_key
-   GROQ_API_KEY=your_groq_api_key
-   DATABASE_URL=your_postgresql_url
-   ```
+## 🔧 Installation
 
-3. **Run development server**:
-   ```bash
-   npm run dev
-   ```
-
-4. **Build for production**:
-   ```bash
-   npm run build
-   npm run start
-   ```
-
-## Deployment
-
-### Vultr Deployment
-1. Connect your GitHub repository to Vultr App Platform
-2. Set build command: `npm run build`
-3. Set start command: `npm run start`
-4. Add environment variables in Vultr dashboard
-
-### Environment Variables
-```
-NODE_ENV=production
-VULTR_API_KEY=your_vultr_api_key
-GROQ_API_KEY=your_groq_api_key
-DATABASE_URL=your_postgresql_url
-BASIC_AUTH_USERNAME=your_username
-BASIC_AUTH_PASSWORD=your_password
+1. **Clone the repository**:
+```bash
+git clone https://github.com/bruchansky/officebrainstorm.git
+cd officebrainstorm
 ```
 
-## Password Protection
+2. **Install dependencies**:
+```bash
+npm install
+```
 
-The app includes basic HTTP authentication for production deployments. Set `BASIC_AUTH_USERNAME` and `BASIC_AUTH_PASSWORD` environment variables to enable password protection.
+3. **Set up environment variables**:
+```bash
+# Required for production
+export NODE_ENV=production
+export VULTR_API_KEY=your_vultr_api_key
+export BASIC_AUTH_USERNAME=your_username
+export BASIC_AUTH_PASSWORD=your_password
+```
 
-## Characters Available
+4. **Build the application**:
+```bash
+npm run build
+```
 
-- Michael Scott (Regional Manager)
-- Dwight Schrute (Assistant Regional Manager)
-- Jim Halpert (Sales Representative)
-- Pam Beesly (Receptionist)
-- Kevin Malone (Accountant)
-- Karen Filippelli (Sales Representative)
-- Jan Levinson (Corporate)
-- Erin Hannon (Receptionist)
+5. **Start the production server**:
+```bash
+npm start
+```
 
-## License
+The application will be available at `http://localhost:5000`
 
-MIT License
+## 🎭 Available Characters
+
+- **Michael Scott** - Regional Manager, attention-seeking and pop culture obsessed
+- **Dwight Schrute** - Assistant Regional Manager, intense and rule-focused
+- **Jim Halpert** - Sales Representative, laid-back with subtle humor
+- **Pam Beesly** - Receptionist, kind and emotionally intelligent
+- **Kevin Malone** - Accountant, simple and food-obsessed
+- **Karen Filippelli** - Sales Representative, confident and professional
+- **Jan Levinson** - VP of Regional Sales, intense and ambitious
+- **Erin Hannon** - Receptionist, cheerful and eager to please
+
+## 🚀 Deployment
+
+### Vultr Cloud Compute
+
+1. Create a Vultr server with Ubuntu 22.04
+2. Install Node.js 20:
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+3. Clone and setup the application:
+```bash
+git clone https://github.com/bruchansky/officebrainstorm.git
+cd officebrainstorm
+npm install
+```
+
+4. Configure environment variables:
+```bash
+export NODE_ENV=production
+export VULTR_API_KEY=your_key
+export BASIC_AUTH_USERNAME=admin
+export BASIC_AUTH_PASSWORD=your_password
+```
+
+5. Build and start:
+```bash
+npm run build
+npm start
+```
+
+6. Configure firewall to allow TCP port 5000
+
+## 🔒 Security
+
+- HTTP Basic Authentication protects the entire application
+- Environment variables store sensitive API keys
+- Firewall configuration restricts access to necessary ports only
+
+## 🏗 Architecture
+
+The application uses a multi-agent AI architecture:
+
+- **LangGraph Workflow**: Orchestrates multi-turn conversations
+- **Character Agents**: Individual AI agents with distinct personalities
+- **Real-time Streaming**: Server-Sent Events for live updates
+- **State Management**: Persistent conversation state throughout sessions
+
+## 📝 API Endpoints
+
+- `GET /` - Main application (protected)
+- `POST /api/brainstorm` - Create new brainstorm session
+- `GET /api/brainstorm/:id` - Get session details
+- `GET /api/brainstorm/:id/stream` - Real-time session streaming
+- `POST /api/brainstorm/:id/user-input` - Submit user participation
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+
+This project is for educational and entertainment purposes.
