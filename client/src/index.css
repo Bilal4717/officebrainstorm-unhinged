@@ -1,0 +1,257 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* The Office themed colors - Primary theme */
+  --office-orange: hsl(30, 95%, 55%);
+  /* Main orange - vibrant The Office orange */
+  --office-orange-light: hsl(30, 95%, 65%);
+  /* Light orange variant */
+  --office-orange-dark: hsl(30, 95%, 45%);
+  /* Dark orange variant */
+  --office-black: hsl(0, 0%, 8%);
+  /* Main black for buttons and text */
+  --office-white: hsl(0, 0%, 98%);
+  /* Clean white */
+  --office-beige: hsl(43, 30%, 92%);
+  /* Warm beige background */
+  --office-cream: hsl(45, 35%, 96%);
+  /* Light cream */
+  --office-gray: hsl(200, 4%, 44%);
+  /* Subtle gray */
+  --office-gray-light: hsl(200, 10%, 85%);
+  /* Light gray */
+  --office-gray-dark: hsl(200, 15%, 25%);
+  /* Dark gray */
+
+  /* Map to shadcn variables using The Office theme */
+  --background: var(--office-cream);
+  --foreground: var(--office-black);
+  --muted: var(--office-beige);
+  --muted-foreground: var(--office-gray);
+  --popover: var(--office-white);
+  --popover-foreground: var(--office-black);
+  --card: var(--office-white);
+  --card-foreground: var(--office-black);
+  --border: var(--office-gray-light);
+  --input: var(--office-white);
+  --primary: var(--office-orange);
+  --primary-foreground: var(--office-white);
+  --secondary: var(--office-black);
+  --secondary-foreground: var(--office-white);
+  --accent: var(--office-orange-light);
+  --accent-foreground: var(--office-black);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: var(--office-white);
+  --ring: var(--office-orange);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased text-foreground;
+    font-family: 'Inter', sans-serif;
+    background-image: url('/theoffice.webp') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+    min-height: 100vh !important;
+  }
+}
+
+@layer utilities {
+
+  /* Office Color Classes */
+  .text-office-orange {
+    color: var(--office-orange);
+  }
+
+  .bg-office-orange {
+    background: linear-gradient(to bottom, #f9a825, #ef6c00);
+  }
+
+  .border-office-orange {
+    border-color: var(--office-orange);
+  }
+
+  .text-office-orange-light {
+    color: var(--office-orange-light);
+  }
+
+  .bg-office-orange-light {
+    background-color: var(--office-orange-light);
+  }
+
+  .text-office-orange-dark {
+    color: var(--office-orange-dark);
+  }
+
+  .bg-office-orange-dark {
+    background-color: var(--office-orange-dark);
+  }
+
+  .text-office-black {
+    color: var(--office-black);
+  }
+
+  .bg-office-black {
+    background-color: var(--office-black);
+  }
+
+  .border-office-black {
+    border-color: var(--office-black);
+  }
+
+  .text-office-white {
+    color: var(--office-white);
+  }
+
+  .bg-office-white {
+    background-color: var(--office-white);
+  }
+
+  .border-office-white {
+    border-color: var(--office-white);
+  }
+
+  .text-office-beige {
+    color: var(--office-beige);
+  }
+
+  .bg-office-beige {
+    background-color: var(--office-beige);
+  }
+
+  .border-office-beige {
+    border-color: var(--office-beige);
+  }
+
+  .text-office-cream {
+    color: var(--office-cream);
+  }
+
+  .bg-office-cream {
+    background-color: var(--office-cream);
+  }
+
+  .text-office-gray {
+    color: var(--office-gray);
+  }
+
+  .bg-office-gray {
+    background-color: var(--office-gray);
+  }
+
+  .text-office-gray-light {
+    color: var(--office-gray-light);
+  }
+
+  .bg-office-gray-light {
+    background-color: var(--office-gray-light);
+  }
+
+  .text-office-gray-dark {
+    color: var(--office-gray-dark);
+  }
+
+  .bg-office-gray-dark {
+    background-color: var(--office-gray-dark);
+  }
+
+  /* Typography Classes - The Office inspired */
+  .font-office-title {
+    font-family: 'Zilla Slab', serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+
+  .font-office-body {
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  /* Office Background - Force with important */
+  .office-background {
+    background-image: url('/theoffice.webp') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+    min-height: 100vh !important;
+  }
+
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Office Button Styles */
+  .btn-office-primary {
+    background-color: var(--office-black);
+    color: var(--office-white);
+    border: 2px solid var(--office-black);
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-office-primary:hover {
+    background: linear-gradient(to bottom, #f9a825, #ef6c00);
+    border-color: var(--office-orange);
+    color: var(--office-white);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-office-secondary {
+    background: linear-gradient(to bottom, #f9a825, #ef6c00);
+    color: var(--office-white);
+    border: 2px solid var(--office-orange);
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-office-secondary:hover {
+    background-color: var(--office-orange-dark);
+    border-color: var(--office-orange-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 138, 0, 0.3);
+  }
+}
