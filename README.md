@@ -1,25 +1,87 @@
-# The Office Brainstorm
+# The Office brainstorm simulator  
+**Can AI come to their rescue?**
 
-An advanced AI-powered brainstorming platform featuring characters from "The Office" TV show. Create dynamic brainstorming sessions with authentic Office characters using cutting-edge AI technology.
+AI-driven brainstorming simulator that uses characters from the notoriously dysfunctional team of The Office to explore the future of collaboration.
+
+While most brainstorm tools focus on generating or capturing ideas, this prototype uses AI to address group dynamics — helping teams work better together in the hybrid, human+AI workplace.
 
 ## 🚀 Features
 
 - **Character Selection**: Choose from 8 authentic Office characters with distinct personalities
-- **AI-Powered Discussions**: Real-time streaming conversations with character-authentic responses
+- **AI-Powered Discussions**: Real-time streaming simulation with character-authentic responses
 - **Interactive Participation**: Users can contribute messages, sticky notes, and vote alongside AI characters
 - **Live Analysis**: Automatic pros/cons analysis of ideas as they're generated
+- **AI Assistant**: AI to encourage the group to better work together
 - **Voting System**: Democratic selection of top ideas with character-specific reasoning
-- **Password Protection**: Secure access with HTTP Basic Authentication
-- **Real-time Updates**: Server-Sent Events for live brainstorm session streaming
 
-## 🛠 Technology Stack
+## 💡 Value Proposition
 
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui
-- **Backend**: Node.js, Express, TypeScript
-- **AI**: Vultr Cloud API with LangChain & LangGraph orchestration
-- **Database**: PostgreSQL with Drizzle ORM (optional, defaults to in-memory)
-- **Authentication**: HTTP Basic Authentication
-- **Deployment**: Vultr Cloud Compute
+- Encourages balanced contribution  
+- Reduces dominance by loud voices  
+- Helps surface overlooked ideas  
+- Makes collaboration visible and measurable  
+
+This is about **thinking better together**, not just faster alone.
+
+---
+
+## 🧪 What the Simulator Does
+
+1. Pick a brainstorming topic (e.g., _“3 items to welcome visiting aliens”_)
+2. Choose a cast of AI agents — like Michael, Jan, or Dwight from *The Office*
+3. Watch the chaos unfold...
+4. Option to participate live to the conversation
+5. Option to inject an AI assistant and observe if dynamics shift
+
+Participants can:
+- Post ideas  
+- Add pros & cons  
+- Discuss and vote  
+
+A healthy brainstorm is defined by:
+- **Participation fairness** (standard deviation of idea shares)  
+- **Discussion coverage** (% of ideas with comments)
+
+---
+
+## 🤖 AI Assistant Behaviors
+
+The AI assistant uses LLMs and agent reasoning to:
+
+- Encourage quieter members  
+- Nudge discussion of neglected ideas  
+- Drop fun facts to lighten the mood (via Groq Compound Mini)  
+- De-emphasize repetitive or dominant voices
+
+---
+
+## 📊 Early Results
+
+Simulations were run with and without an AI assistant:
+
+- With AI assistance:
+  - Idea coverage slightly improved
+  - Participation **fairness didn’t significantly change** (yet)
+
+There’s promising potential — especially with more dynamic group role modeling.
+
+---
+
+## 🛠 Tech Stack
+
+- **LLMs:**  
+  - Groq API (LLaMA 3.3 70B versatile)  
+  - Groq Compound Mini (LLaMA 4 + Web search)  
+  - Vultr Inference (LLaMA 3.1 70B instruct)
+
+- **Frameworks:**  
+  - LangGraph + LangChain  
+  - Zod schemas for structured agent protocol (MCP)
+
+- **Frontend:** React + Vite  
+- **Backend:** Node.js  
+- (deployed om Vultr)
+- (developed with Replit)
 
 ## 📋 Prerequisites
 
@@ -44,6 +106,7 @@ npm install
 ```bash
 # Required for production
 export NODE_ENV=production
+export GROQ_API_KEY=your_groq_api_key
 export VULTR_API_KEY=your_vultr_api_key
 export BASIC_AUTH_USERNAME=your_username
 export BASIC_AUTH_PASSWORD=your_password
@@ -58,83 +121,6 @@ npm run build
 ```bash
 npm start
 ```
-
-The application will be available at `http://localhost:5000`
-
-## 🎭 Available Characters
-
-- **Michael Scott** - Regional Manager, attention-seeking and pop culture obsessed
-- **Dwight Schrute** - Assistant Regional Manager, intense and rule-focused
-- **Jim Halpert** - Sales Representative, laid-back with subtle humor
-- **Pam Beesly** - Receptionist, kind and emotionally intelligent
-- **Kevin Malone** - Accountant, simple and food-obsessed
-- **Karen Filippelli** - Sales Representative, confident and professional
-- **Jan Levinson** - VP of Regional Sales, intense and ambitious
-- **Erin Hannon** - Receptionist, cheerful and eager to please
-
-## 🚀 Deployment
-
-### Vultr Cloud Compute
-
-1. Create a Vultr server with Ubuntu 22.04
-2. Install Node.js 20:
-```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
-```
-
-3. Clone and setup the application:
-```bash
-git clone https://github.com/bruchansky/officebrainstorm.git
-cd officebrainstorm
-npm install
-```
-
-4. Configure environment variables:
-```bash
-export NODE_ENV=production
-export VULTR_API_KEY=your_key
-export BASIC_AUTH_USERNAME=admin
-export BASIC_AUTH_PASSWORD=your_password
-```
-
-5. Build and start:
-```bash
-npm run build
-npm start
-```
-
-6. Configure firewall to allow TCP port 5000
-
-## 🔒 Security
-
-- HTTP Basic Authentication protects the entire application
-- Environment variables store sensitive API keys
-- Firewall configuration restricts access to necessary ports only
-
-## 🏗 Architecture
-
-The application uses a multi-agent AI architecture:
-
-- **LangGraph Workflow**: Orchestrates multi-turn conversations
-- **Character Agents**: Individual AI agents with distinct personalities
-- **Real-time Streaming**: Server-Sent Events for live updates
-- **State Management**: Persistent conversation state throughout sessions
-
-## 📝 API Endpoints
-
-- `GET /` - Main application (protected)
-- `POST /api/brainstorm` - Create new brainstorm session
-- `GET /api/brainstorm/:id` - Get session details
-- `GET /api/brainstorm/:id/stream` - Real-time session streaming
-- `POST /api/brainstorm/:id/user-input` - Submit user participation
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
 
 ## 📄 License
 
