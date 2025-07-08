@@ -1,5 +1,5 @@
 # The Office brainstorm simulator  
-**Can AI come to their rescue?**
+![The Office](screenshots/theofficesimulator.jpg)
 
 AI-driven brainstorming simulator that uses characters from the notoriously dysfunctional team of The Office to explore the future of collaboration.
 
@@ -26,12 +26,15 @@ This is about **thinking better together**, not just faster alone.
 ---
 
 ## 🧪 What the Simulator Does
+![Homepage](screenshots/theofficesimulator-homepage.jpg)
 
 1. Pick a brainstorming topic (e.g., _“3 items to welcome visiting aliens”_)
 2. Choose a cast of AI agents — like Michael, Jan, or Dwight from *The Office*
 3. Watch the chaos unfold...
 4. Option to participate live to the conversation
 5. Option to inject an AI assistant and observe if dynamics shift
+
+![Stickies](screenshots/theofficesimulator-stickies.jpg)
 
 Participants can:
 - Post ideas  
@@ -67,7 +70,8 @@ There’s promising potential — especially with more dynamic group role modeli
 
 ---
 
-## 🛠 Tech Stack
+## 🛠 Architecture
+![Diagram of AI flow](screenshots/theofficesimulator-architecture.jpg)
 
 - **LLMs:**  
   - Groq API (LLaMA 3.3 70B versatile)  
