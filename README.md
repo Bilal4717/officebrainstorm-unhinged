@@ -1,6 +1,8 @@
 # The Office brainstorm simulator  
 ![The Office](screenshots/theofficesimulator.jpg)
 
+🏆 Runner-Up Winner – “Agentic Workflows for the Future of Work” track at Raise Your Hack hackathon (July 2025).
+
 AI-driven brainstorming simulator that uses characters from the notoriously dysfunctional team of The Office to explore the future of collaboration.
 
 While most brainstorm tools focus on generating or capturing ideas, this prototype uses AI to address group dynamics — helping teams work better together in the hybrid, human+AI workplace.
