@@ -65,6 +65,7 @@ export interface BrainstormResults {
     cons: string[];
     hasAnalysis: boolean;
     color: string;
+    chaosBoosted?: boolean;
   }>;
 
   participantStats: Array<{

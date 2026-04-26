@@ -30,6 +30,15 @@ interface StreamingState {
     type: string;
     isUser: boolean;
   };
+  meltdown: {
+    score: number;
+  };
+  chaosCard: {
+    id: "no_buzzwords" | "quiet_priority" | "reverse_voting";
+    name: string;
+    description: string;
+    remainingTurns: number;
+  } | null;
   isComplete: boolean;
   error?: string;
 }
@@ -42,6 +51,8 @@ export function useBrainstormStream(sessionId: number | null) {
     stickyNotes: [],
     keyTakeaways: [],
     participantStats: [],
+    meltdown: { score: 18 },
+    chaosCard: null,
     isComplete: false,
   });
 
@@ -132,6 +143,14 @@ export function useBrainstormStream(sessionId: number | null) {
 
             case 'currentSpeaker':
               newState.currentSpeaker = update.data;
+              break;
+
+            case 'meltdown':
+              newState.meltdown = update.data;
+              break;
+
+            case 'chaosCard':
+              newState.chaosCard = update.data;
               break;
 
             case 'complete':

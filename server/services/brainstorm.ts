@@ -67,9 +67,83 @@ const BrainstormStateAnnotation = Annotation.Root({
   votingResults: Annotation<any>,
   analysisPhase: Annotation<boolean>,
   isComplete: Annotation<boolean>,
+  meltdownScore: Annotation<number>,
+  activeChaosCard: Annotation<
+    | {
+        id: "no_buzzwords" | "quiet_priority" | "reverse_voting";
+        name: string;
+        description: string;
+        remainingTurns: number;
+      }
+    | null
+  >,
+  participantTurnCounts: Annotation<Record<string, number>>,
 });
 
 type BrainstormStateType = typeof BrainstormStateAnnotation.State;
+
+const CHAOS_CARDS = [
+  {
+    id: "no_buzzwords" as const,
+    name: "No Buzzwords Round",
+    description: "Buzzwords spike chaos and get called out.",
+    durationTurns: 2,
+  },
+  {
+    id: "quiet_priority" as const,
+    name: "Quiet Person Priority",
+    description: "Lowest-contribution participant gets the next turns.",
+    durationTurns: 2,
+  },
+  {
+    id: "reverse_voting" as const,
+    name: "Reverse Voting",
+    description: "The least-popular idea gets a chaos bonus before voting.",
+    durationTurns: 2,
+  },
+];
+
+const BUZZWORDS = [
+  "synergy",
+  "leverage",
+  "disruptive",
+  "bandwidth",
+  "pivot",
+  "ideate",
+  "low-hanging fruit",
+];
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function applyMeltdownDelta(current: number, delta: number) {
+  return clamp(current + delta, 0, 100);
+}
+
+function countBuzzwords(message: string): number {
+  const lower = message.toLowerCase();
+  return BUZZWORDS.reduce(
+    (count, term) => (lower.includes(term) ? count + 1 : count),
+    0,
+  );
+}
+
+function sanitizeBuzzwords(message: string): string {
+  let sanitized = message;
+  for (const term of BUZZWORDS) {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    sanitized = sanitized.replace(new RegExp(escaped, "gi"), "[buzzword]");
+  }
+  return sanitized;
+}
+
+function getParticipantTurnCount(
+  participantTurnCounts: Record<string, number>,
+  name: string,
+) {
+  return participantTurnCounts[name] || 0;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Character profiles for participant setup - using enhanced character data
@@ -290,6 +364,9 @@ async function initializeSession(
     votingPhase: false,
     analysisPhase: false,
     isComplete: false,
+    meltdownScore: 18,
+    activeChaosCard: null,
+    participantTurnCounts: {},
   };
 }
 
@@ -311,6 +388,10 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
       phase: "brainstorming",
       message: "Starting character-based brainstorm...",
     });
+    emitUpdate(sessionId, "meltdown", {
+      score: result.meltdownScore,
+    });
+    emitUpdate(sessionId, "chaosCard", null);
 
     return result;
   };
@@ -319,6 +400,8 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
   const determineNextSpeaker = async (
     state: BrainstormStateType,
   ): Promise<Partial<BrainstormStateType>> => {
+    let activeChaosCard = state.activeChaosCard;
+    let meltdownScore = state.meltdownScore || 0;
     const nonAiParticipants = state.participants.filter((p) => p.type !== "ai");
     const maxNonAiTurns = Math.min(3 * nonAiParticipants.length, 40);
 
@@ -332,9 +415,67 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
       return { votingPhase: true };
     }
 
+    const shouldActivateChaosCard =
+      !activeChaosCard &&
+      (state.nonAiTurnCount || 0) > 0 &&
+      (state.nonAiTurnCount || 0) % 3 === 0;
+
+    if (shouldActivateChaosCard) {
+      const randomCard =
+        CHAOS_CARDS[Math.floor(Math.random() * CHAOS_CARDS.length)];
+      activeChaosCard = {
+        id: randomCard.id,
+        name: randomCard.name,
+        description: randomCard.description,
+        remainingTurns: randomCard.durationTurns,
+      };
+      meltdownScore = applyMeltdownDelta(meltdownScore, 8);
+      emitUpdate(sessionId, "chaosCard", activeChaosCard);
+      emitUpdate(sessionId, "meltdown", { score: meltdownScore });
+      emitUpdate(sessionId, "status", {
+        phase: "brainstorming",
+        message: `CHAOS CARD: ${activeChaosCard.name}`,
+      });
+    } else if (activeChaosCard && activeChaosCard.remainingTurns <= 0) {
+      activeChaosCard = null;
+      emitUpdate(sessionId, "chaosCard", null);
+    }
+
     // Advance to next speaker in rotation
-    const nextSpeakerIndex =
-      state.currentSpeaker % (state.participants || []).length;
+    let nextSpeakerIndex = state.currentSpeaker % (state.participants || []).length;
+
+    if (activeChaosCard?.id === "quiet_priority") {
+      const allParticipants = state.participants || [];
+      const nonAiIndices = allParticipants
+        .map((p, index) => ({ participant: p, index }))
+        .filter((entry) => entry.participant.type !== "ai");
+
+      if (nonAiIndices.length > 0) {
+        const minTurns = Math.min(
+          ...nonAiIndices.map((entry) =>
+            getParticipantTurnCount(
+              state.participantTurnCounts || {},
+              entry.participant.name,
+            ),
+          ),
+        );
+        const prioritized = nonAiIndices
+          .filter(
+            (entry) =>
+              getParticipantTurnCount(
+                state.participantTurnCounts || {},
+                entry.participant.name,
+              ) === minTurns,
+          )
+          .map((entry) => entry.index);
+
+        const rotationAnchor = state.currentSpeaker % allParticipants.length;
+        const nextPrioritized =
+          prioritized.find((idx) => idx >= rotationAnchor) ?? prioritized[0];
+        nextSpeakerIndex = nextPrioritized;
+      }
+    }
+
     const nextParticipant = (state.participants || [])[nextSpeakerIndex];
 
     console.log(
@@ -354,7 +495,11 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
       });
     }
 
-    return { currentSpeaker: nextSpeakerIndex };
+    return {
+      currentSpeaker: nextSpeakerIndex,
+      activeChaosCard,
+      meltdownScore,
+    };
   };
 
   // Helper function to calculate participant statistics
@@ -398,6 +543,7 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
       cons: [] as string[],
       hasAnalysis: false,
       color: getCharacterColor(agent.name, state.selectedCharacters || []),
+      chaosBoosted: false,
     };
   }
 
@@ -439,9 +585,21 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
             )
           : 0;
 
+        let renderedMessage = response.message;
+        let meltdownDelta = characterName === "AI Assistant" ? 1 : 3;
+        const activeCard = state.activeChaosCard;
+
+        if (activeCard?.id === "no_buzzwords") {
+          const buzzwordCount = countBuzzwords(renderedMessage);
+          if (buzzwordCount > 0) {
+            renderedMessage = `${sanitizeBuzzwords(renderedMessage)} (⚠️ HR flagged ${buzzwordCount} buzzword${buzzwordCount > 1 ? "s" : ""})`;
+            meltdownDelta += buzzwordCount * 5;
+          }
+        }
+
         const message = {
           speaker: agent.name,
-          message: response.message,
+          message: renderedMessage,
           avatar: agent.avatar,
           type:
             (state.participants || []).find((p) => p.name === agent.name)
@@ -498,6 +656,35 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
 
         // 6. Return updated state
         const isNonAiParticipant = characterName !== "AI Assistant";
+        const participantTurnCounts = {
+          ...(state.participantTurnCounts || {}),
+          ...(isNonAiParticipant
+            ? {
+                [characterName]:
+                  getParticipantTurnCount(
+                    state.participantTurnCounts || {},
+                    characterName,
+                  ) + 1,
+              }
+            : {}),
+        };
+        const activeChaosCard = state.activeChaosCard
+          ? {
+              ...state.activeChaosCard,
+              remainingTurns: isNonAiParticipant
+                ? state.activeChaosCard.remainingTurns - 1
+                : state.activeChaosCard.remainingTurns,
+            }
+          : null;
+        const meltdownScore = applyMeltdownDelta(
+          state.meltdownScore || 0,
+          meltdownDelta + stickyNotesAdded,
+        );
+        emitUpdate(sessionId, "meltdown", { score: meltdownScore });
+        if (activeChaosCard) {
+          emitUpdate(sessionId, "chaosCard", activeChaosCard);
+        }
+
         return {
           discussion: updatedDiscussion,
           stickyNotes: updatedStickyNotes,
@@ -507,16 +694,50 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
             ? (state.nonAiTurnCount || 0) + 1
             : state.nonAiTurnCount || 0,
           participantStats: participantStats,
+          participantTurnCounts,
+          activeChaosCard,
+          meltdownScore,
         };
       } catch (error) {
         console.log(`⚠️ Error with agent ${characterName}:`, error);
         const isNonAiParticipant = characterName !== "AI Assistant";
+        const participantTurnCounts = {
+          ...(state.participantTurnCounts || {}),
+          ...(isNonAiParticipant
+            ? {
+                [characterName]:
+                  getParticipantTurnCount(
+                    state.participantTurnCounts || {},
+                    characterName,
+                  ) + 1,
+              }
+            : {}),
+        };
+        const activeChaosCard = state.activeChaosCard
+          ? {
+              ...state.activeChaosCard,
+              remainingTurns: isNonAiParticipant
+                ? state.activeChaosCard.remainingTurns - 1
+                : state.activeChaosCard.remainingTurns,
+            }
+          : null;
+        const meltdownScore = applyMeltdownDelta(
+          state.meltdownScore || 0,
+          isNonAiParticipant ? 4 : 1,
+        );
+        emitUpdate(sessionId, "meltdown", { score: meltdownScore });
+        if (activeChaosCard) {
+          emitUpdate(sessionId, "chaosCard", activeChaosCard);
+        }
         return {
           currentSpeaker: state.currentSpeaker + 1,
           exchangeCount: (state.exchangeCount || 0) + 1,
           nonAiTurnCount: isNonAiParticipant
             ? (state.nonAiTurnCount || 0) + 1
             : state.nonAiTurnCount || 0,
+          participantTurnCounts,
+          activeChaosCard,
+          meltdownScore,
         };
       }
     };
@@ -534,10 +755,19 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
     let updatedStickyNotes = [...(state.stickyNotes || [])];
 
     // Process user message
+    let meltdownDelta = 3;
     if (userInput.message) {
+      let userMessage = userInput.message;
+      if (state.activeChaosCard?.id === "no_buzzwords") {
+        const buzzwordCount = countBuzzwords(userMessage);
+        if (buzzwordCount > 0) {
+          userMessage = `${sanitizeBuzzwords(userMessage)} (⚠️ HR flagged ${buzzwordCount} buzzword${buzzwordCount > 1 ? "s" : ""})`;
+          meltdownDelta += buzzwordCount * 5;
+        }
+      }
       const message = {
         speaker: userName,
-        message: userInput.message,
+        message: userMessage,
         avatar: "/images/person.png",
         type: "user" as const,
       };
@@ -564,6 +794,7 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
           cons: [] as string[],
           hasAnalysis: false,
           color: "orange",
+          chaosBoosted: false,
         };
         updatedStickyNotes.push(autoStickyNote);
         emitUpdate(sessionId, "stickyNote", autoStickyNote);
@@ -586,6 +817,7 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
           cons: [] as string[],
           hasAnalysis: false,
           color: "orange",
+          chaosBoosted: false,
         };
 
         updatedStickyNotes.push(stickyNote);
@@ -605,6 +837,26 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
     const participantStats = calculateParticipantStats(updatedState);
     emitUpdate(sessionId, "participantStats", participantStats);
 
+    const participantTurnCounts = {
+      ...(state.participantTurnCounts || {}),
+      [userName]:
+        getParticipantTurnCount(state.participantTurnCounts || {}, userName) + 1,
+    };
+    const activeChaosCard = state.activeChaosCard
+      ? {
+          ...state.activeChaosCard,
+          remainingTurns: state.activeChaosCard.remainingTurns - 1,
+        }
+      : null;
+    const meltdownScore = applyMeltdownDelta(
+      state.meltdownScore || 0,
+      meltdownDelta + (userInput.stickyNotes?.length || 0),
+    );
+    emitUpdate(sessionId, "meltdown", { score: meltdownScore });
+    if (activeChaosCard) {
+      emitUpdate(sessionId, "chaosCard", activeChaosCard);
+    }
+
     return {
       discussion: updatedDiscussion,
       stickyNotes: updatedStickyNotes,
@@ -612,6 +864,9 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
       exchangeCount: (state.exchangeCount || 0) + 1,
       nonAiTurnCount: (state.nonAiTurnCount || 0) + 1, // User is always non-AI
       participantStats: participantStats,
+      participantTurnCounts,
+      activeChaosCard,
+      meltdownScore,
     };
   };
 
@@ -694,6 +949,38 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
     const votingRationale: Array<{ speaker: string; reasoning: string }> = [];
     let updatedStickyNotes = [...(state.stickyNotes || [])];
     let updatedDiscussion = [...(state.discussion || [])];
+
+    if (
+      state.activeChaosCard?.id === "reverse_voting" &&
+      updatedStickyNotes.length > 0
+    ) {
+      const minVotes = Math.min(...updatedStickyNotes.map((note) => note.votes));
+      const lowestNotes = updatedStickyNotes.filter(
+        (note) => note.votes === minVotes,
+      );
+      const boostedNote =
+        lowestNotes[Math.floor(Math.random() * lowestNotes.length)];
+
+      boostedNote.votes += 2;
+      boostedNote.chaosBoosted = true;
+      if (!boostedNote.votedBy.includes("Chaos Card")) {
+        boostedNote.votedBy.push("Chaos Card");
+      }
+
+      const chaosMessage = {
+        speaker: "AI Assistant",
+        message: `🎲 Chaos Card activated: Reverse Voting! "${boostedNote.content}" gets a +2 underdog bonus before votes are cast.`,
+        avatar: "/src/images/robot.png",
+        type: "ai" as const,
+      };
+      updatedDiscussion.push(chaosMessage);
+      emitUpdate(sessionId, "discussion", chaosMessage);
+      emitUpdate(sessionId, "status", {
+        phase: "voting",
+        message: `Chaos Card: ${state.activeChaosCard.name} applied`,
+      });
+      emitUpdate(sessionId, "stickyNotes", updatedStickyNotes);
+    }
 
     // Each participant votes using clean agent interface
     for (const participant of votingParticipants) {
@@ -814,6 +1101,7 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
       stickyNotes: updatedStickyNotes,
       votingResults: votingRationale,
       votingPhase: false,
+      activeChaosCard: null,
     };
   };
 
@@ -893,6 +1181,7 @@ function createStreamingLangGraphWorkflow(sessionId: number) {
       keyTakeaways: keyTakeaways,
       participantStats: participantStats,
       isComplete: true,
+      activeChaosCard: null,
     };
   };
 
@@ -997,6 +1286,9 @@ export async function generateBrainstormWithStreaming(sessionData: {
     votingPhase: false,
     votingResults: [],
     isComplete: false,
+    meltdownScore: 18,
+    activeChaosCard: null,
+    participantTurnCounts: {},
   };
 
   // Execute the LangGraph workflow with increased recursion limit

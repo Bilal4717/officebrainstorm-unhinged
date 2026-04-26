@@ -17,6 +17,7 @@ interface StickyNoteBoardProps {
     cons: string[];
     hasAnalysis: boolean;
     color: string;
+    chaosBoosted?: boolean;
   }>;
 }
 
@@ -56,15 +57,22 @@ export function StickyNotesBoard({ stickyNotes }: StickyNoteBoardProps) {
                     <p className="text-sm font-medium text-gray-800 leading-tight flex-1">
                       {note.content}
                     </p>
-                    {note.votes > 0 && (
-                      <Badge
-                        variant="secondary"
-                        className="ml-2 flex items-center gap-1 bg-red-100 text-red-800 border-red-300"
-                      >
-                        <Heart className="h-3 w-3 fill-current" />
-                        {note.votes}
-                      </Badge>
-                    )}
+                    <div className="ml-2 flex flex-col items-end gap-1">
+                      {note.votes > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1 bg-red-100 text-red-800 border-red-300"
+                        >
+                          <Heart className="h-3 w-3 fill-current" />
+                          {note.votes}
+                        </Badge>
+                      )}
+                      {note.chaosBoosted && (
+                        <Badge className="bg-purple-100 text-purple-800 border border-purple-300">
+                          Underdog Bonus
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between">

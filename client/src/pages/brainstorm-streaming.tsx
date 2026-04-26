@@ -20,6 +20,8 @@ import {
   StickyNote,
   BarChart3,
   Loader2,
+  Flame,
+  Zap,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
@@ -53,6 +55,8 @@ export default function BrainstormStreaming({
     votingUpdate,
     analysis,
     currentSpeaker,
+    meltdown,
+    chaosCard,
     isComplete,
     error,
     closeStream,
@@ -226,6 +230,38 @@ ${participantStats.map((stat) => `${stat.name} (${stat.role}): ${stat.stickyNote
                     {status.message}
                   </span>
                 </div>
+              </div>
+
+              {/* Unhinged signal: live meltdown + chaos card */}
+              <div className="mb-6 space-y-3">
+                <div className="bg-red-50 rounded-lg border border-red-200 p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-red-800 flex items-center">
+                      <Flame className="mr-2 h-4 w-4" />
+                      Conference Room Meltdown Meter
+                    </h3>
+                    <span className="text-sm font-bold text-red-700">
+                      {meltdown.score}%
+                    </span>
+                  </div>
+                  <Progress value={meltdown.score} className="w-full" />
+                  <p className="text-xs text-red-700 mt-2">
+                    Higher means more chaos, more interruptions, and wilder dynamics.
+                  </p>
+                </div>
+
+                {chaosCard && (
+                  <div className="bg-purple-50 rounded-lg border border-purple-200 p-3">
+                    <h4 className="font-semibold text-purple-800 flex items-center mb-1">
+                      <Zap className="mr-2 h-4 w-4" />
+                      Chaos Card Active: {chaosCard.name}
+                    </h4>
+                    <p className="text-sm text-purple-700">{chaosCard.description}</p>
+                    <p className="text-xs text-purple-700 mt-1">
+                      Remaining turns: {Math.max(chaosCard.remainingTurns, 0)}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Participants List */}

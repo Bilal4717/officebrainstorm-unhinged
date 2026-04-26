@@ -1,0 +1,21 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# In Render Dashboard: New → Blueprint → connect this repo, or add a Web Service manually.
+services:
+  - type: web
+    name: officebrainstorm
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    # Render provides PORT; server reads process.env.PORT
+    healthCheckPath: /
+    # Optional: add in the Render dashboard if you use them — VULTR_API_KEY, DATABASE_URL, etc.
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GROQ_API_KEY
+        sync: false
+      - key: BASIC_AUTH_USERNAME
+        sync: false
+      - key: BASIC_AUTH_PASSWORD
+        sync: false

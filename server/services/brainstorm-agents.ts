@@ -110,7 +110,8 @@ export interface SummaryAgent {
 ///////////////////////////////////////////////////////////////////////////
 const llm = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY!,
-  model: "llama3-70b-8192",
+  // llama3-70b-8192 was decommissioned by Groq; see https://console.groq.com/docs/deprecations
+  model: "llama-3.3-70b-versatile",
   temperature: 0.8,
 });
 
@@ -118,6 +119,13 @@ const aiAssistantLlm = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY!,
   model: "compound-beta-mini",
   temperature: 0.3,
+});
+
+/** Used for session summaries when Vultr is not configured. */
+const keyTakeawaysLlm = new ChatGroq({
+  apiKey: process.env.GROQ_API_KEY!,
+  model: "llama-3.3-70b-versatile",
+  temperature: 0.1,
 });
 
 ///////////////////////////////////////////////////////////////////////////
@@ -522,7 +530,20 @@ Output only JSON (in case 3 ideas were expected):
 {"keyTakeaways":["idea 1 and its benefits","idea 2 and its benefits","idea 2 and its benefits"]}`;
 
     try {
-      let content = await this.callVultrAPI(prompt);
+      let content: string;
+      if (process.env.VULTR_API_KEY?.trim()) {
+        content = await this.callVultrAPI(prompt);
+      } else {
+        const msg = await keyTakeawaysLlm.invoke([
+          new HumanMessage(
+            `${prompt}\n\nRespond with only the JSON object, no markdown.`,
+          ),
+        ]);
+        content =
+          typeof msg.content === "string"
+            ? msg.content
+            : JSON.stringify(msg.content);
+      }
 
       console.log(
         "🔍 Raw KeyTakeaways response:",
