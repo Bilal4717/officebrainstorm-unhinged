@@ -1,7 +1,8 @@
 # The Office brainstorm simulator  
 ![The Office](screenshots/theofficesimulator.jpg)
 
-🏆 Runner-Up Winner – “Agentic Workflows for the Future of Work” track at Raise Your Hack hackathon (July 2025).
+Built for the Hack@giki AI Challenge theme: "Build Your Unhinged Dream Project."
+Submission: Hack@giki AI Challenge 2026.
 
 AI-driven brainstorming simulator that uses characters from the notoriously dysfunctional team of The Office to explore the future of collaboration.
 
