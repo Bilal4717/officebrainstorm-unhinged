@@ -1,5 +1,4 @@
 # The Office brainstorm simulator  
-![The Office](screenshots/theofficesimulator.jpg)
 
 Built for the Hack@giki AI Challenge theme: "Build Your Unhinged Dream Project."
 Submission: Hack@giki AI Challenge 2026.
